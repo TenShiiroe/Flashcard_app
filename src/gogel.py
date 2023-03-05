@@ -18,7 +18,7 @@ Base class for storing images/ cards
 """
 class Image(object):
     def __init__(self, name: str, path: str) -> None:
-        self.answer: str = name
+        self.name: str = name
         self.paths: List[str] = [path]
 
 
@@ -45,12 +45,8 @@ class Deck(object):
         self.cards: List[Image] = []
 
 
-    def getDeckToDict(self) -> Dict[str, List[str]]:
-        return {x.answer: x.paths for x in self.cards}
-
-
     def addCard(self, image: Image) -> None:
-        possibleCopy = self.getCardByName(image.answer)
+        possibleCopy = self.getCardByName(image.name)
         if possibleCopy is None:
             self.cards.append(image)
         else:
@@ -60,7 +56,7 @@ class Deck(object):
 
     def getCardByName(self, name: str) -> Optional[Image]:
         for card in self.cards:
-            if card.answer == name:
+            if card.name == name:
                 return card
         return None
 
@@ -125,16 +121,10 @@ class DeckController(object):
                 shutil.copyfile(filePath, f"{DIR}\\__temp_transfer\\{os.path.basename(imgDir)}_{count}.{end}", follow_symlinks=True)
 
 
-    def initDeck(self, deckName: str) -> Optional[Deck]:
-        if not os.path.exists(f"{DECKS_BASE}\\{deckName}"):
-            os.makedirs(f"{DECKS_BASE}\\{deckName}")
-        else:
-            print("trying to alter existing deck")
-            return None  # Deck already exists
-        
+    def BuildDeck(self, deckName: str) -> Optional[Deck]:
         if not os.path.exists(f"{DIR}\\__temp_transfer"):
-            os.mkdir(f"{DIR}\\__temp_transfer")
-
+            return None
+        
         for imgName in os.listdir(f"{DIR}\\__temp_transfer"):
             imgPath = os.path.join(f"{DIR}\\__temp_transfer", imgName)
             shutil.copyfile(imgPath, f"{DECKS_BASE}\\{deckName}\\{imgName}", follow_symlinks=True)
@@ -154,12 +144,19 @@ class DeckController(object):
 
 
     def makeDeck(self, query: List[str], name: str) -> Optional[Deck]:
+        if not os.path.exists(f"{DECKS_BASE}\\{name}"):
+            os.makedirs(f"{DECKS_BASE}\\{name}")
+        else:
+            print("trying to alter existing deck")
+            return None  # Deck already exists
+
         img_downloader.googleDownloadPics(query)
         if DeckController.scanForImages() == -1:
             return None
-        returnValue =  self.initDeck(name)
+        returnValue =  self.BuildDeck(name)
         img_downloader.clearDownloads()
         return returnValue
+  
   
 
 """

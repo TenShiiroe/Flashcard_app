@@ -1,0 +1,488 @@
+#:kivy 1.0
+#:import Factory kivy.factory.Factory
+
+#TODO:
+# GIF play_speed??
+# make start deck screen for user to choose a deck to play? could move to manage decks
+# Make a game menu - play, manage decks[create new<download items, upload>, delete, edit], 
+#                    options[vid, volume?, brightness, light/ dark mode/ colors???,etc..],
+#                    
+#add manage decks screen, options screen, deck create screen, deck delete screen, deck edit screen. diff options screens
+# Make a login screen more normal - smaller etc
+# Make custom rounded button??? custom animated button/ textures? (gif background, transparent butt, click = play frame 0?)
+
+WindowManager:
+    LoginScreen:
+    ImageScreen:
+    MainScreen:
+    SettingsScreen:
+    DeckManageScreen:
+    DeckAddScreen:
+    DeckEditScreen:
+
+
+
+
+<ArrowBtn@Button>:
+    background_color: 0,0,0,0
+    background_normal: ""
+
+    Image:
+        source: "Btn_background.gif"
+        anim_delay: 0.005
+        anim_loop: 1
+
+        allow_stretch: True
+        keep_ratio: False
+        size: (self.parent.size[0]*1.1, self.parent.size[1]*1.1)
+        x: self.parent.size[0] - self.parent.size[0]*1.1 + 1
+        y: self.parent.size[1] - self.parent.size[1]*1.1 + 1
+        canvas.before:
+            PushMatrix
+            Rotate:
+                angle: 180
+                origin: self.center
+        canvas.after:
+            PopMatrix
+
+<Image>:
+    allow_stretch: True
+    keep_ratio: True
+    pos_hint: {"x": 0, "y": 0}
+    size_hint: (1, .75)
+    z: 1
+
+<VideoPlayer>:
+    allow_stretch: True
+    keep_ratio: True
+    pos_hint: {"x": 0, "y": 0}
+    size_hint: (1, .75)
+    allow_fullscreen: False
+    z: 0
+
+<Button>:
+    bold: True
+    background_normal: ""
+    background_color: "#707070"
+
+
+
+<RoundedButtor@Button>:
+    background_color: 0, 0, 0, 0
+    background_normal: ""
+
+    canvas.before:
+        Color:
+            rgba: (.55, .55, .55, 1) if self.state == "normal" else (0, .7, .7, 1)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [60,]
+# #################################### SETTINGS EDIT SCREEN ##########################################
+# #################################### SETTINGS EDIT SCREEN ##########################################
+# #################################### SETTINGS EDIT SCREEN ##########################################
+<SettingsScreen>:
+    BoxLayout:
+        orientation:"vertical"
+        padding: 40
+        spacing: 30
+        Label:
+            text: "why are we here? just to suffer?"
+        Button:
+            text: "pls let me go BACK"
+            size_hint: 1, .1
+            on_press:
+                root.manager.current = "MainScreen"
+                root.manager.transition.direction = "right"
+
+        Label:
+            #size_hint: .1, .1
+            halign: "center"
+            text: "will be added later"
+# #################################### DECK ADD SCREEN ##########################################
+# #################################### DECK ADD SCREEN ##########################################
+# #################################### DECK ADD SCREEN ##########################################
+
+<DeckAddScreen>:
+    name: "DeckAddScreen"
+    BoxLayout:
+        padding: 30
+        spacing: 10
+        orientation:"vertical"
+        BoxLayout:
+            orientation:"vertical"
+            Label:
+                text: "Deck name"
+                size_hint: 1, .1
+            TextInput:
+                text: ""
+                id: deckName
+                multiline: False
+                size_hint: .5, .1
+            Label:
+                text: "images to download - pls oddeluj cez ','"
+                size_hint: 1, .1
+            TextInput:
+                text: ""
+                id: downloadQuery
+                multiline: False
+                size_hint: 1, .1
+            Button:
+                text: "expand"
+                size_hint: 1, .1
+                on_press:
+                    downloadQuery.size_hint = [1, 1] if downloadQuery.size_hint != [1, 1] else [1, .1]
+                    downloadQuery.multiline = False if downloadQuery.multiline is True else True
+            Label:
+                id: listOfImages
+                #multiline: True
+                text: ""
+            Label:
+                id: progressBarPercentage
+                text: ""
+                size_hint: 1, .1
+            ProgressBar:
+                id: downloadProgressBar
+                min: 0
+                value: 0
+
+            Button:
+                text: "download"  # ADD check if sure
+                size_hint: 1, .1
+                on_press:
+                    root.downloadImages()
+
+
+        Button:
+            text: "go back"
+            size_hint: 1, .1
+            on_press:
+                root.manager.current = "DeckManageScreen"
+                root.manager.transition.direction = "down"
+
+
+
+# #################################### DECK EDIT SCREEN ##########################################
+# #################################### DECK EDIT SCREEN ##########################################
+# #################################### DECK EDIT SCREEN ##########################################
+<deckShowcase>:
+    padding: 30
+    spacing: 10
+    background_color: (.5, .7, .6, 1)
+
+<DeckEditScreen>:
+    name: "DeckEditScreen"
+    BoxLayout:
+        orientation:"vertical"
+        BoxLayout:
+            padding: 30
+            spacing: 10
+            orientation:"horizontal"
+            Button:
+                text:"go back"
+                on_press:
+                    root.manager.current = "DeckManageScreen"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "play deck"
+                on_press:
+                    root.manager.current = "ImageScreen"
+                    root.manager.transition.direction = "up"
+                    root.playDeck()
+        deckShowcase:
+            name: root.name
+            id: deckShowcaseID
+        Button:
+            size_hint: 1, None
+            text: "delete deck"
+            on_press:
+                root.manager.current = "DeckManageScreen"  # TODO add popup to confirm
+                root.manager.transition.direction = "right"
+                root.deleteDeck()
+
+
+# #################################### DECK MANAGE SCREEN ##########################################
+# #################################### DECK MANAGE SCREEN ##########################################
+# #################################### DECK MANAGE SCREEN ##########################################
+<scrollerCardList>:
+    viewclass: "DeckButton"
+    RecycleBoxLayout:
+        padding: 30
+        spacing: 10
+        default_size: None, 100
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: "vertical"
+        background_color: (.5, .7, .6, 1)
+
+
+<DeckManageScreen>:
+    name: "DeckManageScreen"
+    BoxLayout:
+        padding: 40
+        spacing: 30
+        orientation:"vertical"
+        Label:
+            text: ""
+            size_hint: 1, .1
+
+        Button:
+            text: "Add deck"
+            size_hint: 1, .1
+            on_press:
+                root.manager.current = "DeckAddScreen"
+                root.manager.transition.direction = "up"
+
+        ScrollerCardList:
+            id: CardListID
+        Button:
+            text: "byeeee have a great time (go back)"
+            size_hint: 1, .1
+            on_press:
+                root.manager.current = "MainScreen"
+                root.manager.transition.direction = "right"
+# #################################### IMAGE SCREEN ##########################################
+# #################################### IMAGE SCREEN ##########################################
+# #################################### IMAGE SCREEN ##########################################     
+<HintPopup@Popup>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: True
+    title: "Answer"
+
+    BoxLayout:
+        orientation: "vertical"
+
+        Label:
+            id: ans
+            opacity: 0
+            text: app.root.get_screen("ImageScreen").hint
+        Button:
+            text: "Reveal answer"
+            on_press: ans.opacity = 1
+        Button:
+            text: "Close"
+            on_press: root.dismiss()
+
+<GoBackPopup@Popup>:
+    id: gbp
+    size_hint: 0.5, 0.5
+    auto_dismiss: True
+    title: "Close?"
+    return_main: False
+
+    BoxLayout:
+        orientation: "vertical"
+
+        Label:
+            text: "Return to Main menu?"
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: "No"
+                on_press:
+                    root.dismiss()
+            Button:
+                text: "Yes"
+                on_press:
+                    app.root.current = "MainScreen"
+                    app.root.transition.direction = "right"
+                    app.root.get_screen("ImageScreen").ids.vid.state = "stop"
+                    root.dismiss()
+
+
+<ImageScreen>:
+    name: "ImageScreen"
+    FloatLayout:
+        pos_hint: {"x": 0, "y": 0.3}
+        Image:
+            id: img
+            source: root.randPath
+
+            anim_delay: root.animDelay
+            anim_loop: 0
+            opacity: 1-vid.opacity
+
+        VideoPlayer:
+            id: vid
+            source: root.vidPath
+
+            state: "play" if vid.opacity == 1 else "stop"
+            opacity: root.vidOpacity
+            disabled: False
+
+            
+        Button:
+
+            id: buttor
+            text: "play/stop"
+            opacity: root.btnOpacity
+            disabled: buttor.opacity == 0
+            pos_hint: {"x": .88 , "y": -0.1}
+            size_hint: .1, .1
+            z: 2
+            on_press:
+                root.gif_btn()
+
+
+
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: 1, 0.3
+        spacing: 50
+        Button:
+            size_hint: (0.5, 0.5)
+            text: "go back"
+            on_press:
+                Factory.GoBackPopup().open()
+
+        BoxLayout:
+            orientation:"vertical"
+            padding: [0, 50, 0, 0]
+            TextInput:
+                id: imgAnswer
+                text: "answer: "
+                on_focus: self.text = ""
+                multiline: False
+                on_text_validate: submitButtonID.trigger_action() if nextBtn.disabled else nextBtn.trigger_action(); imgAnswer.text = ""
+
+                text_validate_unfocus: False
+
+                pos_hint: {"x": -0.25, "y": 0.5}
+                size_hint: (1.5, None)
+                height: 30
+            BoxLayout:
+                orientation:"vertical"
+                pos_hint: {"x": 0.25, "y": 0.5}
+                Button:
+                    id: submitButtonID
+                    size_hint: (0.5, 0.5)
+                    text:"submit answer"
+
+                    on_press:
+                        if imgAnswer.text == root.hint: nextBtn.disabled = False
+
+                Button:
+                    text: "hint?"
+                    background_color: 1, 1, 1, 0
+                    size_hint_x: None
+                    size_hint: (0.5, 0.5)
+                    on_press:
+                        Factory.HintPopup().open()
+
+        Button:
+            id: nextBtn
+            text: "next"
+            background_disabled_normal: ""
+            disabled_color: 1, 1, 1, .5
+            background_normal: ""
+            background_color: "#505050" if self.disabled else "#707070"
+            size_hint: (0.5 , 0.5)
+            pos_hint: {"x": 0 , "y": 0}
+            disabled: True
+            on_press:
+                imgAnswer.text = "answer " #TODO add :
+                nextBtn.disabled = True
+                root.change_image()
+
+   
+# #################################### MAIN SCREEN ##########################################
+# #################################### MAIN SCREEN ##########################################
+# #################################### MAIN SCREEN ##########################################
+
+<MainScreen>:
+    name: "MainScreen"
+    
+    BoxLayout:
+        padding: 30
+        spacing: 10
+        orientation: "vertical"
+
+
+        RoundedButtor:
+            id: continueButtonID
+            text: "continue"
+            disabled: not root.canContinue
+            on_press:
+                print(app, app.root, root, root.canContinue)
+                print(root.ids)
+                root.manager.current = "ImageScreen"
+                root.manager.transition.direction = "left"
+        RoundedButtor:
+            disabled: root.isGuest
+            text: "manage decks"
+            on_press:
+                root.manager.current = "DeckManageScreen"
+                root.manager.transition.direction = "left"
+        RoundedButtor:
+            text: "settings"
+            on_press:
+                root.manager.current = "SettingsScreen"
+                root.manager.transition.direction = "left"
+        RoundedButtor:
+            text: "log out"
+            on_press:
+                root.manager.current = "LoginScreen"
+                root.manager.transition.direction = "right"
+
+# #################################### LOGIN SCREEN ##########################################
+# #################################### LOGIN SCREEN ##########################################
+# #################################### LOGIN SCREEN ##########################################
+
+
+#TODO add register button - + funct, admin functions
+
+<LoginScreen>:
+    name: "LoginScreen"  
+    
+    BoxLayout:
+        orientation: "vertical"
+        padding: 10
+        spacing: 10
+
+        GridLayout:
+            rows: 2
+            cols: 2
+            padding: 10
+            spacing: 10
+
+            Label:
+                text: "Username"
+                size_hint_x: None
+                width: 100
+            TextInput:
+                id: username
+                multiline: False
+            Label:
+                text: "Password"
+                size_hint_x: None
+                width: 100
+            TextInput:
+                id: userpass
+                multiline: False
+                password: True
+
+        BoxLayout:
+            orientation: "vertical"
+            Button:
+                id: testloginbutton
+                text: "Send"
+                on_press:
+                    app.root.get_screen("MainScreen").isGuest = False
+                    root.manager.current = "MainScreen"
+                    root.manager.transition.direction = "left"
+            Button:
+                id: guestLogin
+                background_color: 0, 0, 0, 0
+                text: "Continue as a guest"
+                on_press:
+                    app.root.get_screen("MainScreen").isGuest = True
+                    root.manager.current = "MainScreen"
+                    root.manager.transition.direction = "left"
+            
+
+
+
+
+
+
