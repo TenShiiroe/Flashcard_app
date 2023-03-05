@@ -27,11 +27,18 @@ class Image(object):
             self.paths.append(path)
             return
         print("Invalid path - doesn't exist")
-    
+
+
+    def deleteCard(self) -> None:  # TODO add proper destructor, hande errors
+        for path in self.paths:
+            os.remove(path)
+        self.paths = []
+        
 
     def removePath(self, path: str) -> None:
         if path in self.paths:
             self.paths.remove(path)
+            os.remove(path)
             return
         print("path doesn't exist")
 
@@ -43,6 +50,16 @@ class Deck(object):
         self.name: str = name
         self.timesPlayed: int = 0
         self.cards: List[Image] = []
+
+
+    def deleteDeck(self) -> None:  # TODO add proper destructor, handle errors
+        for card in self.cards:
+            card.deleteCard()
+        shutil.rmtree(f"{DECKS_BASE}\\{self.name}")
+
+
+    def getAllPaths(self) -> List[str]:
+        return list(path for card in self.cards for path in card.paths)
 
 
     def addCard(self, image: Image) -> None:
@@ -150,11 +167,11 @@ class DeckController(object):
             print("trying to alter existing deck")
             return None  # Deck already exists
 
-        img_downloader.googleDownloadPics(query)
+        Img_downloader.googleDownloadPics(query)
         if DeckController.scanForImages() == -1:
             return None
         returnValue =  self.BuildDeck(name)
-        img_downloader.clearDownloads()
+        Img_downloader.clearDownloads()
         return returnValue
   
   
@@ -162,10 +179,10 @@ class DeckController(object):
 """
 "Static" class for downloading and basic image managing
 """
-class img_downloader(object):
+class Img_downloader(object):
     @staticmethod
     def googleDownloadPics(search_keys: List[str], limit: int = BASE_PIC_LIMIT) -> None:
-        img_downloader.clearDownloads()
+        Img_downloader.clearDownloads()
         response = google_images_download.googleimagesdownload()
         arguments = {"keywords": f'{",".join(search_keys)}',
                     "limit": limit,

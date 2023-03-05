@@ -196,7 +196,8 @@ class ImageScreen(Screen):  #maybe popup later?
         self.btnOpacity = 0
         self.vidOpacity = 0
         print(self.deckName)
-        if len(deckManager.getDeckByName(self.deckName).cards) == 0:
+        currDeck = deckManager.getDeckByName(self.deckName)
+        if len(currDeck.cards) == 0:
 
             App.get_running_app().stop()
             #Window.grab_mouse() TODO exploit- easter egg AHAHAHAHHA
@@ -205,8 +206,8 @@ class ImageScreen(Screen):  #maybe popup later?
             #Window.hide() #TODO save user data then exit 
             Window.close()
             return
-        card = random.choice(deckManager.getDeckByName(self.deckName).cards)
-        random_path = random.choice(card.paths)
+        random_path = random.choice(currDeck.getAllPaths())
+        card = currDeck.getCardByPath(random_path)  # theoretically error/ None shouldnt happen
         print(random_path)
         card.paths.remove(random_path) #key error shouldn't happen
         if len(card.paths) == 0:
