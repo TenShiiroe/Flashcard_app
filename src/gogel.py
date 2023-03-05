@@ -91,6 +91,7 @@ class DeckController(object):
         if not os.path.exists(f"{DECKS_BASE}"):
             return -1  # No decks aviable to load 
 
+        self.decks = []
         for deck in os.listdir(DECKS_BASE):
             _tmpAdd = self.dirToDeck(deck)
             if _tmpAdd is not None:
