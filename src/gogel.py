@@ -194,6 +194,10 @@ class Img_downloader(object):
     def clearDownloads() -> None:
         if os.path.exists(DIR):
             shutil.rmtree(DIR)  # wipe all downloaded files + temp transfer // basically clear cache?
+    
+    @staticmethod
+    def fileCount() -> int:
+        return len(os.listdir(f"{DIR}") * BASE_PIC_LIMIT)
 
 
 

@@ -16,8 +16,8 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.carousel import Carousel
 import time
 import os
-
-from gogel import DeckController
+import threading
+from gogel import DeckController, Img_downloader
 
 ### WARNING THIS IS ONLY A VERY ROUGH SKETCH
 ### The program is somewhat working, but there are certainly a lot bugs
@@ -65,7 +65,8 @@ class WindowManager(ScreenManager):
 
 
 class DeckAddScreen(Screen): 
-    
+    def updateProgressBar(self):
+        self.ids.progressBarPercentage.value = Img_downloader.fileCount()
 
     def downloadImages(self):
         query = self.ids.downloadQuery.text
@@ -81,10 +82,15 @@ class DeckAddScreen(Screen):
         self.ids.listOfImages.text = "--".join(parsed)  # all texts update too late - after make deck (make deck makes app freeze? multithread? :()
         self.ids.downloadProgressBar.max = 3 * len(parsed)
         self.ids.progressBarPercentage.text = "Deck making in the progress"
-        deckManager.makeDeck(parsed,name)  # hope I don't need to multithread for real progressbar :)
+        t1 = threading.Thread(target=deckManager.makeDeck, args=(parsed, name))  # Didnt help :( - cool
+        t2 = threading.Thread(target=self.updateProgressBar)
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
         self.ids.progressBarPercentage.text = "Deck complete"
-        self.ids.downloadProgressBar.value = 3 * len(parsed)
-
+        3 * len(parsed)
+        
 
 class DeckEditScreen(Screen): 
     DeckName = StringProperty()
