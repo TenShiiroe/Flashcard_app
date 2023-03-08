@@ -65,8 +65,16 @@ class WindowManager(ScreenManager):
 
 
 class DeckAddScreen(Screen): 
-    def updateProgressBar(self):
-        self.ids.progressBarPercentage.value = Img_downloader.fileCount()
+    def updateProgressBarIDK(self, fc):
+
+        while self.ids.downloadProgressBar.value < fc:
+            accFc = Img_downloader.fileCount()
+            self.ids.downloadProgressBar.value = accFc
+            self.ids.progressBarPercentage.text = f"Deck making in the progress - {round((accFc/fc)*100, 2)}%"
+            time.sleep(0.1)
+        self.ids.downloadProgressBar.value = fc
+        self.ids.progressBarPercentage.text = "Deck complete"
+
 
     def downloadImages(self):
         query = self.ids.downloadQuery.text
@@ -81,15 +89,16 @@ class DeckAddScreen(Screen):
         parsed = [x.strip() for x in query.split(",")]
         self.ids.listOfImages.text = "--".join(parsed)  # all texts update too late - after make deck (make deck makes app freeze? multithread? :()
         self.ids.downloadProgressBar.max = 3 * len(parsed)
-        self.ids.progressBarPercentage.text = "Deck making in the progress"
+        self.ids.downloadProgressBar.value = 0
+        self.ids.progressBarPercentage.text = "Deck making in the progress - 0%"
         t1 = threading.Thread(target=deckManager.makeDeck, args=(parsed, name))  # Didnt help :( - cool
-        t2 = threading.Thread(target=self.updateProgressBar)
+        t1.daemon = True
         t1.start()
+
+        t2 = threading.Thread(target=(self.updateProgressBarIDK), args=([3 * len(parsed)]))
+        t2.daemon = True
         t2.start()
-        t1.join()
-        t2.join()
-        self.ids.progressBarPercentage.text = "Deck complete"
-        3 * len(parsed)
+    
         
 
 class DeckEditScreen(Screen): 

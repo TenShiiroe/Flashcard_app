@@ -2,7 +2,7 @@ from google_images_download import google_images_download # Download images
 import shutil  # Copy files
 import os  # Group images
 from typing import List, Optional, Dict  # typecheck
-
+import time
 
 DATA_FOLDER = "_data"
 DIR = f"{DATA_FOLDER}\\_downloads"  # Folder with downloaded images
@@ -141,7 +141,7 @@ class DeckController(object):
     def BuildDeck(self, deckName: str) -> Optional[Deck]:
         if not os.path.exists(f"{DIR}\\__temp_transfer"):
             return None
-        
+        time.sleep(1)  #time to get progressbar updated
         for imgName in os.listdir(f"{DIR}\\__temp_transfer"):
             imgPath = os.path.join(f"{DIR}\\__temp_transfer", imgName)
             shutil.copyfile(imgPath, f"{DECKS_BASE}\\{deckName}\\{imgName}", follow_symlinks=True)
@@ -197,8 +197,10 @@ class Img_downloader(object):
     
     @staticmethod
     def fileCount() -> int:
-        return len(os.listdir(f"{DIR}") * BASE_PIC_LIMIT)
-
+        curr = os.path.join(os.getcwd(), DIR)
+        if not os.path.exists(curr):
+            os.mkdir(curr)
+        return len(os.listdir(curr)) * BASE_PIC_LIMIT
 
 
 
