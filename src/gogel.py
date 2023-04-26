@@ -155,7 +155,7 @@ class DeckController(object):
         deck = Deck(deckName)
         for fileName in os.listdir(f"{DECKS_BASE}\\{deckName}"):
             filePath = os.path.join(f"{DECKS_BASE}\\{deckName}", fileName)
-            imgAnswer = ("".join(fileName.split("_")[:-1])).strip()  # remove number,extension and trailing whitespaces
+            imgAnswer = ("".join(fileName.split(".")[:-1])).strip()  # remove number,extension and trailing whitespaces
             deck.addCard(Image(imgAnswer, filePath))
         return deck
 
@@ -199,7 +199,7 @@ class Img_downloader(object):
     def fileCount() -> int:
         curr = os.path.join(os.getcwd(), DIR)
         if not os.path.exists(curr):
-            os.mkdir(curr)
+            os.makedirs(curr)
         return len(os.listdir(curr)) * BASE_PIC_LIMIT
 
 

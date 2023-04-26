@@ -189,7 +189,7 @@ class ImageScreen(Screen):  #maybe popup later?
             
         else:
             self.randPath = random_path
-        self.hint = "".join(os.path.basename(random_path).split("\\")[-1].split(".")[:-1]).strip()
+        self.hint = card.name
 
     def gif_btn(self):
         self.animDelay = 0.04 if self.animDelay == -1 else -1  # TODO maybe other speed options
